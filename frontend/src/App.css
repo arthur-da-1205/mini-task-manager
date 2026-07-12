@@ -1,0 +1,180 @@
+.app-shell {
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 40px 0;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #2563eb;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.subtitle {
+  max-width: 720px;
+  margin: 0;
+  color: #64748b;
+}
+
+.actor-picker {
+  min-width: 180px;
+}
+
+.panel {
+  padding: 24px;
+  margin-bottom: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
+}
+
+.task-form {
+  display: grid;
+  gap: 16px;
+}
+
+.task-form button {
+  justify-self: start;
+}
+
+.section-title,
+.task-main,
+.task-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-title {
+  margin-bottom: 16px;
+}
+
+.section-title span {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.task-list {
+  display: grid;
+  gap: 14px;
+}
+
+.task-card {
+  padding: 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.task-card h3 {
+  margin: 0 0 6px;
+}
+
+.task-card p {
+  margin: 0 0 8px;
+  color: #475569;
+}
+
+.task-card small {
+  color: #64748b;
+}
+
+.task-actions {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin-top: 16px;
+}
+
+.status-badge {
+  display: inline-flex;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-to_do {
+  color: #334155;
+  background: #e2e8f0;
+}
+
+.status-pending {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.status-in_progress {
+  color: #1d4ed8;
+  background: #dbeafe;
+}
+
+.status-done {
+  color: #047857;
+  background: #d1fae5;
+}
+
+.audit-log {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.audit-log h4 {
+  margin: 0 0 10px;
+}
+
+.audit-log ol {
+  display: grid;
+  gap: 8px;
+  padding-left: 22px;
+  margin: 0;
+}
+
+.error-banner {
+  padding: 12px 14px;
+  margin: 0 0 20px;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  color: #991b1b;
+  background: #fef2f2;
+}
+
+.empty-state {
+  color: #64748b;
+}
+
+.secondary {
+  color: #334155;
+  background: #e2e8f0;
+}
+
+.danger {
+  color: #ffffff;
+  background: #dc2626;
+}
+
+@media (max-width: 760px) {
+  .page-header,
+  .task-main {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actor-picker {
+    min-width: 0;
+  }
+}
