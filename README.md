@@ -142,4 +142,5 @@ After that, I would introduce pagination/filtering for tasks and audit logs, bec
 
 ## AI Usage
 
-AI assisted with implementation structure, code generation, and README drafting. I validated the result by running backend tests and TypeScript builds, and by keeping the domain rules explicit in backend tests so the generated code is checked against the required behavior.
+AI was used as a development assistant to speed up parts of the implementation, including generating UI scaffolding, creating endpoint testing scenarios, and reviewing the database schema to identify potential improvements or inconsistencies.
+All architectural decisions, business rules, API behavior, and database design were validated manually. I reviewed and understood every AI-generated suggestion, tested the application manually, and ensured the implementation matched the requirements.
