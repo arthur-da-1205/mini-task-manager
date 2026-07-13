@@ -56,6 +56,16 @@ If the backend API is not on `http://localhost:3001/api`, update:
 VITE_API_URL=http://localhost:<backend-port>/api
 ```
 
+Frontend code is organized by feature and uses local shadcn-style UI components:
+
+- `frontend/src/app/` contains the app shell and providers.
+- `frontend/src/pages/` contains route/page-level orchestration components.
+- `frontend/src/components/ui/` contains reusable shadcn-style primitives.
+- `frontend/src/features/tasks/services/` contains task API calls and TanStack Query hooks.
+- `frontend/src/features/tasks/resources/` contains task types and constants.
+- `frontend/src/features/tasks/libs/` contains task-specific helper functions.
+- `frontend/src/lib/http-client.ts` contains the shared Axios client.
+
 ## API
 
 All responses use either `{ "data": ... }` or `{ "error": { "code": "...", "message": "..." } }`.
