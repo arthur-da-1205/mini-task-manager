@@ -30,7 +30,7 @@ pnpm prisma:migrate
 pnpm dev
 ```
 
-The backend runs on `http://localhost:3000`.
+The backend runs on the port configured in `backend/.env`. The default example uses `http://localhost:3001`.
 
 Useful commands:
 
@@ -43,16 +43,17 @@ pnpm build
 
 ```bash
 cd frontend
+cp .env.example .env
 pnpm install
 pnpm dev
 ```
 
-The frontend runs on the Vite dev server, usually `http://localhost:5173`.
+The frontend runs on the port configured in `frontend/.env`. The default example uses `http://localhost:5000`.
 
-If the backend is not on `http://localhost:3000`, set:
+If the backend API is not on `http://localhost:3001/api`, update:
 
 ```bash
-VITE_API_URL=http://localhost:<backend-port>
+VITE_API_URL=http://localhost:<backend-port>/api
 ```
 
 ## API
@@ -69,6 +70,16 @@ All responses use either `{ "data": ... }` or `{ "error": { "code": "...", "mess
 ## Architecture
 
 The backend owns all domain rules. The frontend only guides the user toward valid actions, but validation still happens on the server so API consumers cannot skip or reverse statuses.
+
+Backend task code is organized as a small Express module:
+
+- `backend/src/app.ts` configures global middleware and mounts modules.
+- `backend/src/lib/prisma.ts` creates the Prisma client singleton.
+- `backend/src/middlewares/error-handler.middleware.ts` formats application and validation errors.
+- `backend/src/modules/tasks/task.routes.ts` maps HTTP paths to controller methods.
+- `backend/src/modules/tasks/task.controller.ts` handles HTTP concerns and response formatting.
+- `backend/src/modules/tasks/task.schemas.ts` contains Zod request validation schemas.
+- `backend/src/modules/tasks/task.service.ts` owns task status rules, soft delete behavior, and audit-log persistence.
 
 The main backend flow for status changes is:
 

@@ -1,17 +1,8 @@
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
+import { ApiError } from "../common/errors/api-error";
 
-export class ApiError extends Error {
-  constructor(
-    public readonly statusCode: number,
-    public readonly code: string,
-    message: string,
-  ) {
-    super(message);
-  }
-}
-
-export function sendError(
+export function errorHandler(
   error: unknown,
   _request: Request,
   response: Response,

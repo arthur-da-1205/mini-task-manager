@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import './App.css'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001/api'
 
 const STATUSES = ['to_do', 'pending', 'in_progress', 'done'] as const
 const ACTORS = ['john.doe', 'jane.doe', 'qonflo.bot'] as const
@@ -43,7 +43,9 @@ function getNextStatus(status: TaskStatus) {
 }
 
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const baseUrl = API_BASE_URL.replace(/\/$/, '')
+  const requestPath = path.startsWith('/') ? path : `/${path}`
+  const response = await fetch(`${baseUrl}${requestPath}`, {
     headers: { 'Content-Type': 'application/json', ...init?.headers },
     ...init,
   })
@@ -76,19 +78,19 @@ function App() {
 
   const tasksQuery = useQuery({
     queryKey: ['tasks'],
-    queryFn: () => requestJson<Task[]>('/api/tasks'),
+    queryFn: () => requestJson<Task[]>('/tasks'),
   })
 
   const auditLogsQuery = useQuery({
     queryKey: ['auditLogs', expandedTaskId],
     queryFn: () =>
-      requestJson<AuditLog[]>(`/api/tasks/${expandedTaskId}/audit-logs`),
+      requestJson<AuditLog[]>(`/tasks/${expandedTaskId}/audit-logs`),
     enabled: expandedTaskId !== null,
   })
 
   const createTaskMutation = useMutation({
     mutationFn: (input: { title: string; description?: string }) =>
-      requestJson<Task>('/api/tasks', {
+      requestJson<Task>('/tasks', {
         method: 'POST',
         body: JSON.stringify(input),
       }),
@@ -101,7 +103,7 @@ function App() {
 
   const updateStatusMutation = useMutation({
     mutationFn: (input: { taskId: string; status: TaskStatus; actor: Actor }) =>
-      requestJson<Task>(`/api/tasks/${input.taskId}/status`, {
+      requestJson<Task>(`/tasks/${input.taskId}/status`, {
         method: 'PATCH',
         body: JSON.stringify({ status: input.status, actor: input.actor }),
       }),
@@ -113,7 +115,7 @@ function App() {
 
   const deleteTaskMutation = useMutation({
     mutationFn: (taskId: string) =>
-      requestJson<Task>(`/api/tasks/${taskId}`, { method: 'DELETE' }),
+      requestJson<Task>(`/tasks/${taskId}`, { method: 'DELETE' }),
     onSuccess: (_task, taskId) => {
       if (expandedTaskId === taskId) {
         setExpandedTaskId(null)
