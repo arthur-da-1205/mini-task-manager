@@ -116,6 +116,14 @@ SQLite is used because it is enough for the assessment scope and keeps setup sim
 - The UI only exposes the next valid status instead of a free-form status selector. This reduces user error, while backend validation remains the source of truth.
 - SQLite is practical for local assessment, but production usage with many users would need stronger concurrency and operational guarantees.
 
+## If I Had More Time
+
+- Add pagination and filtering for tasks and audit logs.
+- Add optimistic locking or stricter concurrency control for high-frequency status updates.
+- Add frontend component tests around the status confirmation dialog and audit-log drawer.
+- Add lightweight API documentation with request and response examples.
+- Improve production hardening with structured logging, request IDs, and database-level audit-log write restrictions.
+
 ## Audit Log Immutability
 
 The application never exposes update or delete operations for audit logs. Audit logs are only inserted during valid status transitions, and task deletion is soft-delete only, so historical logs are not removed with the task.

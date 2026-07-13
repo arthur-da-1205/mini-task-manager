@@ -9,7 +9,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createApp } from "../src/app";
 
 let app: Express;
-let prisma: PrismaClient;
+let prisma: PrismaClient | undefined;
 let tempDir: string;
 
 async function createTask(title = "Prepare Invoice") {
@@ -42,12 +42,16 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  if (!prisma) {
+    throw new Error("Prisma test client is not initialized");
+  }
+
   await prisma.auditLog.deleteMany();
   await prisma.task.deleteMany();
 });
 
 afterAll(async () => {
-  await prisma.$disconnect();
+  await prisma?.$disconnect();
   rmSync(tempDir, { recursive: true, force: true });
 });
 
@@ -69,6 +73,40 @@ describe("task API", () => {
     const response = await updateStatus(task.id, "in_progress").expect(409);
 
     expect(response.body.error.code).toBe("INVALID_STATUS_TRANSITION");
+
+    const auditResponse = await request(app)
+      .get(`/api/tasks/${task.id}/audit-logs`)
+      .expect(200);
+
+    expect(auditResponse.body.data).toHaveLength(0);
+  });
+
+  it("rejects backward status transitions", async () => {
+    const task = await createTask();
+
+    await updateStatus(task.id, "pending").expect(200);
+
+    const response = await updateStatus(task.id, "to_do").expect(409);
+
+    expect(response.body.error.code).toBe("INVALID_STATUS_TRANSITION");
+
+    const auditResponse = await request(app)
+      .get(`/api/tasks/${task.id}/audit-logs`)
+      .expect(200);
+
+    expect(auditResponse.body.data).toHaveLength(1);
+    expect(auditResponse.body.data[0]).toMatchObject({
+      fromStatus: "to_do",
+      toStatus: "pending",
+    });
+  });
+
+  it("rejects unknown actors before writing audit logs", async () => {
+    const task = await createTask();
+
+    const response = await updateStatus(task.id, "pending", "unknown.user").expect(400);
+
+    expect(response.body.error.code).toBe("VALIDATION_ERROR");
 
     const auditResponse = await request(app)
       .get(`/api/tasks/${task.id}/audit-logs`)
@@ -132,5 +170,29 @@ describe("task API", () => {
 
     expect(auditResponse.body.data).toHaveLength(1);
     expect(auditResponse.body.data[0].toStatus).toBe("pending");
+  });
+
+  it("returns audit logs in chronological ascending order", async () => {
+    const task = await createTask();
+
+    await updateStatus(task.id, "pending", "john.doe").expect(200);
+    await updateStatus(task.id, "in_progress", "jane.doe").expect(200);
+    await updateStatus(task.id, "done", "qonflo.bot").expect(200);
+
+    const auditResponse = await request(app)
+      .get(`/api/tasks/${task.id}/audit-logs`)
+      .expect(200);
+
+    expect(
+      auditResponse.body.data.map(
+        (log: { fromStatus: string; toStatus: string }) =>
+          `${log.fromStatus}->${log.toStatus}`,
+      ),
+    ).toEqual(["to_do->pending", "pending->in_progress", "in_progress->done"]);
+
+    const createdAtValues = auditResponse.body.data.map(
+      (log: { createdAt: string }) => new Date(log.createdAt).getTime(),
+    );
+    expect(createdAtValues).toEqual([...createdAtValues].sort((left, right) => left - right));
   });
 });
