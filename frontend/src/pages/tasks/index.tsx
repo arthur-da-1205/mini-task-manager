@@ -13,7 +13,9 @@ import {
   useUpdateTaskStatusMutation,
 } from '@/features/tasks/services/task.queries'
 import { ActorSelect } from '@/features/tasks/components/actor-select'
+import { AuditLogDrawer } from '@/features/tasks/components/audit-log-drawer'
 import { CreateTaskForm } from '@/features/tasks/components/create-task-form'
+import { StatusUpdateConfirmationDialog } from '@/features/tasks/components/status-update-confirmation-dialog'
 import { TaskCard } from '@/features/tasks/components/task-card'
 import { getNextTaskStatus } from '@/features/tasks/libs/get-next-task-status'
 import type { Actor, Task } from '@/features/tasks/resources/task.types'
@@ -21,13 +23,18 @@ import { getErrorMessage } from '@/lib/get-error-message'
 
 export function TaskManagerPage() {
   const [actor, setActor] = useState<Actor>('john.doe')
-  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null)
+  const [auditLogTask, setAuditLogTask] = useState<Task | null>(null)
+  const [statusUpdateTask, setStatusUpdateTask] = useState<Task | null>(null)
 
   const tasksQuery = useTasksQuery()
   const updateStatusMutation = useUpdateTaskStatusMutation()
   const deleteTaskMutation = useDeleteTaskMutation((taskId) => {
-    if (expandedTaskId === taskId) {
-      setExpandedTaskId(null)
+    if (auditLogTask?.id === taskId) {
+      setAuditLogTask(null)
+    }
+
+    if (statusUpdateTask?.id === taskId) {
+      setStatusUpdateTask(null)
     }
   })
 
@@ -36,22 +43,27 @@ export function TaskManagerPage() {
     getErrorMessage(updateStatusMutation.error) ??
     getErrorMessage(deleteTaskMutation.error)
 
-  function handleAdvanceStatus(task: Task) {
-    const nextStatus = getNextTaskStatus(task.status)
+  function handleConfirmStatusUpdate() {
+    if (!statusUpdateTask) {
+      return
+    }
+
+    const nextStatus = getNextTaskStatus(statusUpdateTask.status)
 
     if (!nextStatus) {
       return
     }
 
-    updateStatusMutation.mutate({
-      taskId: task.id,
-      status: nextStatus,
-      actor,
-    })
-  }
-
-  function handleToggleAuditLog(taskId: string) {
-    setExpandedTaskId((currentTaskId) => (currentTaskId === taskId ? null : taskId))
+    updateStatusMutation.mutate(
+      {
+        taskId: statusUpdateTask.id,
+        status: nextStatus,
+        actor,
+      },
+      {
+        onSuccess: () => setStatusUpdateTask(null),
+      },
+    )
   }
 
   return (
@@ -107,17 +119,39 @@ export function TaskManagerPage() {
                 key={task.id}
                 task={task}
                 actor={actor}
-                isExpanded={expandedTaskId === task.id}
                 isUpdating={updateStatusMutation.isPending}
                 isDeleting={deleteTaskMutation.isPending}
-                onAdvanceStatus={handleAdvanceStatus}
+                onAdvanceStatus={setStatusUpdateTask}
                 onDelete={deleteTaskMutation.mutate}
-                onToggleAuditLog={handleToggleAuditLog}
+                onOpenAuditLog={setAuditLogTask}
               />
             ))}
           </div>
         </CardContent>
       </Card>
+
+      <AuditLogDrawer
+        task={auditLogTask}
+        open={auditLogTask !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setAuditLogTask(null)
+          }
+        }}
+      />
+
+      <StatusUpdateConfirmationDialog
+        task={statusUpdateTask}
+        actor={actor}
+        open={statusUpdateTask !== null}
+        isSubmitting={updateStatusMutation.isPending}
+        onOpenChange={(open) => {
+          if (!open) {
+            setStatusUpdateTask(null)
+          }
+        }}
+        onConfirm={handleConfirmStatusUpdate}
+      />
     </main>
   )
 }

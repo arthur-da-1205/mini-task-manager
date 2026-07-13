@@ -10,29 +10,26 @@ import { STATUS_LABELS } from '../resources/task.constants'
 import { formatDateTime } from '../../../lib/format-date-time'
 import { getNextTaskStatus } from '../libs/get-next-task-status'
 import type { Actor, Task } from '../resources/task.types'
-import { AuditLogList } from './audit-log-list'
 import { TaskStatusBadge } from './task-status-badge'
 
 type TaskCardProps = {
   task: Task
   actor: Actor
-  isExpanded: boolean
   isUpdating: boolean
   isDeleting: boolean
   onAdvanceStatus: (task: Task) => void
   onDelete: (taskId: string) => void
-  onToggleAuditLog: (taskId: string) => void
+  onOpenAuditLog: (task: Task) => void
 }
 
 export function TaskCard({
   task,
   actor,
-  isExpanded,
   isUpdating,
   isDeleting,
   onAdvanceStatus,
   onDelete,
-  onToggleAuditLog,
+  onOpenAuditLog,
 }: TaskCardProps) {
   const nextStatus = getNextTaskStatus(task.status)
 
@@ -66,9 +63,9 @@ export function TaskCard({
             type="button"
             size="sm"
             variant="outline"
-            onClick={() => onToggleAuditLog(task.id)}
+            onClick={() => onOpenAuditLog(task)}
           >
-            {isExpanded ? 'Hide audit log' : 'Show audit log'}
+            View audit log
           </Button>
 
           <Button
@@ -86,7 +83,6 @@ export function TaskCard({
           Current actor for status changes: {actor}
         </p>
 
-        {isExpanded ? <AuditLogList taskId={task.id} /> : null}
       </CardContent>
     </Card>
   )

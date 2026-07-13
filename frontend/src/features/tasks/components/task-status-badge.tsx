@@ -12,11 +12,15 @@ const statusClassName: Record<TaskStatus, string> = {
 
 type TaskStatusBadgeProps = {
   status: TaskStatus
+  className?: string
 }
 
-export function TaskStatusBadge({ status }: TaskStatusBadgeProps) {
+export function TaskStatusBadge({ status, className }: TaskStatusBadgeProps) {
   return (
-    <Badge variant="outline" className={cn('whitespace-nowrap', statusClassName[status])}>
+    <Badge
+      variant="outline"
+      className={cn('whitespace-nowrap', statusClassName[status], className)}
+    >
       {STATUS_LABELS[status]}
     </Badge>
   )
